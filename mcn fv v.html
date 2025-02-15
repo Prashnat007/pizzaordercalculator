@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Pizza Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet>
+    <style>
+        :root {
+            --primary: #EF476F;
+            --secondary: #FFD166;
+            --accent: #06D6A0;
+            --dark: #073B4C;
+            --light: #F8F9FA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h2 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .size-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .size-option {
+            padding: 1.5rem;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .size-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .size-option input:checked + .checkmark {
+            display: block;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--accent);
+            color: var(--dark);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .toppings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .topping-card {
+            border: 2px solid #eee;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .topping-card.selected {
+            border-color: var(--accent);
+            background: rgba(6, 214, 160, 0.1);
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .qty-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .qty-btn:hover {
+            transform: scale(1.1);
+        }
+
+        #quantity {
+            width: 60px;
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+        }
+
+        #pizzaPreview {
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+            position: relative;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .topping-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+
+        button.calculate-btn {
+            background: var(--primary);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            font-weight: 600;
+        }
+
+        button.calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(239, 71, 111, 0.4);
+        }
+
+        #result {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: var(--light);
+            border-radius: 10px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .success { background: #06D6A0; }
+        .error { background: #EF476F; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🍕 Ultimate Pizza Calculator</h2>
+        
+        <div class="size-options">
+            <label class="size-option">
+                <input type="radio" name="size" value="100" required>
+                <div class="checkmark">✔</div>
+                <h3>Small</h3>
+                <p>₹100</p>
+            </label>
+            <label class="size-option">
+                <input type="radio" name="size" value="120">
+                <div class="checkmark">✔</div>
+                <h3>Medium</h3>
+                <p>₹120</p>
+            </label>
+            <label class="size-option">
+                <input type="radio" name="size" value="150">
+                <div class="checkmark">✔</div>
+                <h3>Large</h3>
+                <p>₹150</p>
+            </label>
+        </div>
+
+        <div class="toppings-grid" id="toppingsContainer">
+            <!-- Toppings added dynamically -->
+        </div>
+
+        <div class="quantity-selector">
+            <button class="qty-btn" onclick="adjustQuantity(-1)">-</button>
+            <input type="number" id="quantity" value="1" min="1">
+            <button class="qty-btn" onclick="adjustQuantity(1)">+</button>
+        </div>
+
+        <div class="form-group">
+            <label class="topping-card" style="justify-content: center">
+                <input type="checkbox" id="delivery">
+                <span>🚚 Home Delivery (₹50)</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <input type="text" id="coupon" placeholder="Enter coupon code" 
+                   style="padding: 0.8rem; width: 200px; border-radius: 8px; border: 2px solid #eee">
+            <button class="qty-btn" onclick="applyCoupon()" 
+                    style="margin-left: 1rem; width: auto; padding: 0.8rem 1.5rem">Apply</button>
+        </div>
+
+        <button class="calculate-btn" onclick="calculateTotal()">
+            Calculate Total 🧾
+        </button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const toppings = [
+            { name: 'Cheese', price: 25, emoji: '🧀' },
+            { name: 'Pepperoni', price: 35, emoji: '🍖' },
+            { name: 'Mushrooms', price: 25, emoji: '🍄' },
+            { name: 'Olives', price: 20, emoji: '🫒' },
+            { name: 'Peppers', price: 25, emoji: '🫑' },
+            { name: 'Pineapple', price: 30, emoji: '🍍' }
+        ];
+
+        let cart = {
+            size: null,
+            toppings: [],
+            quantity: 1,
+            delivery: false,
+            coupon: null
+        };
+
+        // Initialize toppings
+        function initToppings() {
+            const container = document.getElementById('toppingsContainer');
+            toppings.forEach(topping => {
+                const card = document.createElement('label');
+                card.className = 'topping-card';
+                card.innerHTML = `
+                    <input type="checkbox" value="${topping.price}" 
+                           data-name="${topping.name}" 
+                           onchange="updateTopping(this)">
+                    ${topping.emoji} ${topping.name} (+₹${topping.price})
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateTopping(checkbox) {
+            const topping = {
+                name: checkbox.dataset.name,
+                price: parseInt(checkbox.value)
+            };
+            
+            if(checkbox.checked) {
+                cart.toppings.push(topping);
+                checkbox.parentElement.classList.add('selected');
+            } else {
+                cart.toppings = cart.toppings.filter(t => t.name !== topping.name);
+                checkbox.parentElement.classList.remove('selected');
+            }
+        }
+
+        function adjustQuantity(change) {
+            const qtyInput = document.getElementById('quantity');
+            let newVal = parseInt(qtyInput.value) + change;
+            if(newVal < 1) newVal = 1;
+            qtyInput.value = newVal;
+            cart.quantity = newVal;
+        }
+
+        const coupons = {
+            'PIZZA20': { type: 'percentage', value: 20 },
+            'SAVE50': { type: 'fixed', value: 50 },
+            'FREEDEL': { type: 'delivery', value: 100 }
+        };
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function applyCoupon() {
+            const code = document.getElementById('coupon').value.toUpperCase();
+            if(coupons[code]) {
+                cart.coupon = coupons[code];
+                showNotification('Coupon applied successfully!');
+            } else {
+                showNotification('Invalid coupon code!', 'error');
+            }
+        }
+
+        function calculateTotal() {
+            // Get base price
+            const sizeInput = document.querySelector('input[name="size"]:checked');
+            if(!sizeInput) {
+                showNotification('Please select a pizza size!', 'error');
+                return;
+            }
+            cart.size = parseInt(sizeInput.value);
+
+            // Calculate components
+            const basePrice = cart.size;
+            const toppingsPrice = cart.toppings.reduce((sum, t) => sum + t.price, 0);
+            const deliveryFee = document.getElementById('delivery').checked ? 50 : 0;
+            let discount = 0;
+            let deliveryDiscount = 0;
+
+            // Apply coupon
+            if(cart.coupon) {
+                switch(cart.coupon.type) {
+                    case 'percentage':
+                        discount = (basePrice + toppingsPrice) * (cart.coupon.value / 100);
+                        break;
+                    case 'fixed':
+                        discount = cart.coupon.value;
+                        break;
+                    case 'delivery':
+                        deliveryDiscount = deliveryFee;
+                        break;
+                }
+            }
+
+            // Calculate total
+            const total = (
+                (basePrice + toppingsPrice) * cart.quantity +
+                deliveryFee -
+                discount -
+                deliveryDiscount
+            );
+
+            // Display result
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h3>Order Summary</h3>
+                <p>Base Price: ₹${basePrice}</p>
+                ${cart.toppings.length ? `<p>Toppings: ₹${toppingsPrice}</p>` : ''}
+                <p>Quantity: ${cart.quantity}</p>
+                ${deliveryFee ? `<p>Delivery Fee: ₹${deliveryFee}</p>` : ''}
+                ${discount ? `<p>Discount: -₹${discount}</p>` : ''}
+                ${deliveryDiscount ? `<p>Delivery Discount: -₹${deliveryDiscount}</p>` : ''}
+                <h4 style="margin-top: 1rem; color: var(--primary)">Total: ₹${total}</h4>
+                <p style="margin-top: 1rem; text-align: center">🎉 Thank you for your order! 🍕</p>
+            `;
+
+            // Confetti effect
+            for(let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: hsl(${Math.random() * 360}, 70%, 50%);
+                    left: ${Math.random() * 100}vw;
+                    top: -10px;
+                    border-radius: 50%;
+                    animation: fall ${Math.random() * 3 + 2}s linear;
+                    z-index: 999;
+                `;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
+        // Initialize the app
+        initToppings();
+    </script>
+</body>
+</html>
