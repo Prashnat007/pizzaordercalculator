@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Pizza Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EF476F;
+            --secondary: #FFD166;
+            --accent: #06D6A0;
+            --dark: #073B4C;
+            --light: #F8F9FA;
+        }
+
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #ff8e8e;
+            --accent: #ffd93d;
+            --dark: #2d3436;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            transform: translateY(0);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h2 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.2em;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .size-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .size-option {
+            position: relative;
+            padding: 1rem;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .size-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .size-option input:checked + .checkmark {
+            display: block;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--accent);
+            color: var(--dark);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .toppings-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .toppings-label:hover {
+            transform: translateX(10px);
+            background: #fff;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #result {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            animation: fadeIn 0.6s ease-out;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .price-badge {
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-weight: 600;
+            display: inline-block;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .thank-you {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 1rem;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .toppings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .topping-card {
+            border: 2px solid var(--light);
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .topping-card.selected {
+            border-color: var(--accent);
+            background: rgba(6, 214, 160, 0.1);
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .qty-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .qty-btn:hover {
+            transform: scale(1.1);
+        }
+
+        #pizzaPreview {
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+            position: relative;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .topping-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+
+        .order-history {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 10px;
+        }
+
+        /* Animation for pizza spin */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🍕 Advanced Pizza Calculator</h2>
+        
+        <div id="pizzaPreview">
+            <img src="https://i.ibb.co/7Yk3ZzL/pizza-base.png" class="topping-image" id="base">
+            <!-- Add more topping images dynamically -->
+        </div>
+
+        <form id="pizzaForm">
+            <!-- Size Selection (same as before) -->
+
+            <div class="form-group">
+                <h3>Select Toppings (₹25 each):</h3>
+                <div class="toppings-grid" id="toppingsContainer">
+                    <!-- Toppings added dynamically -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <h3>Quantity:</h3>
+                <div class="quantity-selector">
+                    <button type="button" class="qty-btn" onclick="adjustQuantity(-1)">-</button>
+                    <input type="number" id="quantity" value="1" min="1" class="qty-input">
+                    <button type="button" class="qty-btn" onclick="adjustQuantity(1)">+</button>
+                </div>
+            </div>
+
+            <!-- Add Delivery Options -->
+            <div class="form-group">
+                <label class="toppings-label">
+                    <input type="checkbox" id="delivery">
+                    <span>Home Delivery (₹50) 🚚</span>
+                </label>
+            </div>
+
+            <!-- Coupon Code Section -->
+            <div class="form-group">
+                <input type="text" id="coupon" placeholder="Enter coupon code">
+                <button type="button" onclick="applyCoupon()">Apply</button>
+            </div>
+
+            <button type="button" onclick="calculateTotal()">
+                Calculate Total 🧾
+            </button>
+        </form>
+
+        <div id="result"></div>
+        <div class="order-history" id="orderHistory"></div>
+    </div>
+
+    <script>
+        // Advanced Features
+        const toppings = [
+            { name: 'Cheese', price: 25, image: 'cheese.png' },
+            { name: 'Pepperoni', price: 35, image: 'pepperoni.png' },
+            { name: 'Mushrooms', price: 25, image: 'mushrooms.png' },
+            { name: 'Olives', price: 20, image: 'olives.png' },
+            { name: 'Peppers', price: 25, image: 'peppers.png' }
+        ];
+
+        let cart = {
+            size: null,
+            toppings: [],
+            quantity: 1,
+            delivery: false,
+            coupon: null
+        };
+
+        // Initialize toppings
+        function initToppings() {
+            const container = document.getElementById('toppingsContainer');
+            toppings.forEach(topping => {
+                const card = document.createElement('label');
+                card.className = 'topping-card';
+                card.innerHTML = `
+                    <input type="checkbox" value="${topping.price}" 
+                           data-name="${topping.name}" 
+                           onchange="updateTopping(this)">
+                    ${topping.name} (+₹${topping.price})
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateTopping(checkbox) {
+            const topping = {
+                name: checkbox.dataset.name,
+                price: parseInt(checkbox.value)
+            };
+            
+            if(checkbox.checked) {
+                cart.toppings.push(topping);
+            } else {
+                cart.toppings = cart.toppings.filter(t => t.name !== topping.name);
+            }
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const preview = document.getElementById('pizzaPreview');
+            preview.innerHTML = '<img src="pizza-base.png" class="topping-image">';
+            
+            cart.toppings.forEach(topping => {
+                const img = document.createElement('img');
+                img.src = topping.image;
+                img.className = 'topping-image';
+                preview.appendChild(img);
+            });
+        }
+
+        function adjustQuantity(change) {
+            const qtyInput = document.getElementById('quantity');
+            let newVal = parseInt(qtyInput.value) + change;
+            if(newVal < 1) newVal = 1;
+            qtyInput.value = newVal;
+            cart.quantity = newVal;
+        }
+
+        // Coupon system
+        const coupons = {
+            'PIZZA20': 20,
+            'SAVE50': 50,
+            'FREEDEL': 'free-delivery'
+        };
+
+        function applyCoupon() {
+            const code = document.getElementById('coupon').value;
+            if(coupons[code]) {
+                cart.coupon = code;
+                showNotification('Coupon applied successfully!');
+            } else {
+                showNotification('Invalid coupon code!', 'error');
+            }
+        }
+
+        // Calculate total with all features
+        function calculateTotal() {
+            let basePrice = cart.size || 0;
+            let toppingsPrice = cart.toppings.reduce((sum, t) => sum + t.price, 0);
+            let deliveryFee = cart.delivery ? 50 : 0;
+            let discount = 0;
+
+            // Apply coupon
+            if(cart.coupon) {
+                const couponValue = coupons[cart.coupon];
+                if(typeof couponValue === 'number') {
+                    discount = couponValue;
+                } else if(couponValue === 'free-delivery') {
+                    deliveryFee = 0;
+                }
+            }
+
+            let total = (basePrice + toppingsPrice) * cart.quantity + deliveryFee - discount;
+            
+            // Save order to history
+            saveOrderHistory({
+                basePrice,
+                toppingsPrice,
+                deliveryFee,
+                discount,
+                total
+            });
+
+            showResult(total);
+        }
+
+        // LocalStorage integration for order history
+        function saveOrderHistory(order) {
+            let history = JSON.parse(localStorage.getItem('pizzaOrders') || []);
+            history.push(order);
+            localStorage.setItem('pizzaOrders', JSON.stringify(history));
+            displayOrderHistory();
+        }
+
+        function displayOrderHistory() {
+            const history = JSON.parse(localStorage.getItem('pizzaOrders') || []);
+            const container = document.getElementById('orderHistory');
+            container.innerHTML = `<h3>Order History (Last 5):</h3>`;
+            
+            history.slice(-5).reverse().forEach(order => {
+                container.innerHTML += `
+                    <div class="history-item">
+                        <p>Total: ₹${order.total} (Qty: ${cart.quantity})</p>
+                        <small>${new Date().toLocaleString()}</small>
+                    </div>
+                `;
+            });
+        }
+
+        // Initialize app
+        initToppings();
+        displayOrderHistory();
+    </script>
+</body>
+</html>
